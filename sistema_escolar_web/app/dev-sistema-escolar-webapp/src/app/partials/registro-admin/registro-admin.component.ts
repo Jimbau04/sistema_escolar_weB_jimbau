@@ -35,6 +35,7 @@ export class RegistroAdminComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.token = this.facadeService.getSessionToken();
     //valida si hay un parametro en el url
     if(this.activatedRoute.snapshot.params['id']!=undefined)
       {

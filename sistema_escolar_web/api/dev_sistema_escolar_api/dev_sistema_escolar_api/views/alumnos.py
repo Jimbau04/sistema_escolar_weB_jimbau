@@ -84,6 +84,11 @@ class AlumnosAll(generics.CreateAPIView):
 class AlumnosView(generics.CreateAPIView):
     #obtener usuario por id
     permission_classes = (permissions.IsAuthenticated,)
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+    
     def get(self, request, *args, **kwargs):
         alumno = get_object_or_404(Alumnos, id = request.GET.get("id"))
         alumno = AlumnoSerializer(alumno, many=False).data
@@ -138,5 +143,21 @@ class AlumnosView(generics.CreateAPIView):
 
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    
-    #TODO: Editar alumno
+    @transaction.atomic
+    def put(self, request, *args, **kwargs):
+        permissions_classes = (permissions.IsAuthenticated,)
+        alumno = get_object_or_404(Alumnos, id=request.data["id"])
+        alumno.matricula = request.data["matricula"]
+        alumno.curp = request.data["curp"].upper()
+        alumno.rfc = request.data["rfc"].upper()
+        alumno.fecha_nacimiento = request.data["fecha_nacimiento"]
+        alumno.edad = request.data["edad"]
+        alumno.telefono = request.data["telefono"]
+        alumno.ocupacion = request.data["ocupacion"]
+        alumno.save()
+        user = alumno.user
+        user.first_name = request.data["first_name"]
+        user.last_name = request.data["last_name"]
+        
+        user.save()
+        return Response({"message": "Alumno actualizado correctamente", "alumno": AlumnoSerializer(alumno).data}, 200)

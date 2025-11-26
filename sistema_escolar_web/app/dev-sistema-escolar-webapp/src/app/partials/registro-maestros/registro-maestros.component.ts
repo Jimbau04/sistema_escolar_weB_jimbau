@@ -56,11 +56,22 @@ export class RegistroMaestrosComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.maestro = this.maestrosService.esquemaMaestro();
-    // Rol del usuario
-    this.maestro.rol = this.rol;
+    this.token = this.facadeService.getSessionToken();
+    if(this.activatedRoute.snapshot.params['id']!=undefined)
+      {
+        this.editar = true;
+        this.idUser = this.activatedRoute.snapshot.params['id'];
+        console.log("ID USUARIO: ", this.idUser);
+        //al ingresar a editar, cargar los datos del usuario
+        this.maestro = this.datos_user;
+      }else{
+        //primer registro de admin
+        this.maestro = this.maestrosService.esquemaMaestro();
+        this.maestro.rol = this.rol;
+        this.token = this.facadeService.getSessionToken();
 
-    console.log("Datos maestro: ", this.maestro);
+      }
+      console.log("maestro: ", this.maestro);
   }
 
   public regresar(){
@@ -102,8 +113,28 @@ export class RegistroMaestrosComponent implements OnInit {
   }
 
   public actualizar(){
-
+  // Validamos el formulario
+  this.errors = {};
+  this.errors = this.maestrosService.validarMaestro(this.maestro, this.editar);
+  if(Object.keys(this.errors).length > 0){
+    return false;
   }
+
+  // Ejecutar servicio de editar
+  this.maestrosService.actualizarMaestro(this.maestro).subscribe(
+    (response) => {
+      // Redirigir o mostrar mensaje de éxito
+      alert("Maestro actualizado exitosamente");
+      console.log("Maestro actualizado: ", response);
+      this.router.navigate(["maestros"]);
+    },
+    (error) => {
+      // Manejar errores de la API
+      alert("Error al actualizar maestro");
+      console.error("Error al actualizar maestro: ", error);
+    }
+  );
+}
 
   //Funciones para password
   showPassword()

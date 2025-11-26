@@ -64,7 +64,7 @@ export class FacadeService {
       username: username,
       password: password
     }
-    return this.http.post<any>(`${environment.url_api}/token/`,data);
+    return this.http.post<any>(`${environment.url_api}/login/`,data);
   }
 
   //Cerrar sesión

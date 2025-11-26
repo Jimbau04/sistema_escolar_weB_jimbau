@@ -95,6 +95,11 @@ class MaestrosAll(generics.CreateAPIView):
 class MaestrosView(generics.CreateAPIView):
     #obtener usuario por id
     permission_classes = (permissions.IsAuthenticated,)
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+    
     def get(self, request, *args, **kwargs):
         maestro = get_object_or_404(Maestros, id = request.GET.get("id"))
         maestro = MaestroSerializer(maestro, many=False).data
@@ -144,6 +149,24 @@ class MaestrosView(generics.CreateAPIView):
             return Response({"maestro_created_id": maestro.id }, 201)
         return Response(user.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    #TODO: Editar maestro
+    @transaction.atomic
+    def put(self, request, *args, **kwargs):
+        maestro = get_object_or_404(Maestros, id=request.data["id"])
+        user = maestro.user
+        user.first_name = request.data["first_name"]
+        user.last_name = request.data["last_name"]
+        
+        user.save()
+        
+        maestro.id_trabajador= request.data["id_trabajador"]
+        maestro.fecha_nacimiento= request.data["fecha_nacimiento"]
+        maestro.telefono= request.data["telefono"]
+        maestro.rfc= request.data["rfc"].upper()
+        maestro.cubiculo= request.data["cubiculo"]
+        maestro.area_investigacion= request.data["area_investigacion"]
+        maestro.materias_json = json.dumps(request.data["materias_json"])
+        maestro.save()
+        
+        return Response({"message": "Maestro actualizado correctamente", "maestro": MaestroSerializer(maestro).data}, 200)
     
    

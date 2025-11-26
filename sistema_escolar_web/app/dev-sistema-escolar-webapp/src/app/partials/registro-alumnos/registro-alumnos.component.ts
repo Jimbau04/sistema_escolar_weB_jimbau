@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { AlumnosService } from 'src/app/services/alumnos.service';
+import { FacadeService } from 'src/app/services/facade.service';
 
 @Component({
   selector: 'app-registro-alumnos',
@@ -30,14 +31,26 @@ export class RegistroAlumnosComponent implements OnInit {
     private location : Location,
     public activatedRoute: ActivatedRoute,
     private alumnosService: AlumnosService
+    ,private facadeService: FacadeService
   ) { }
 
   ngOnInit(): void {
-    this.alumno = this.alumnosService.esquemaAlumno();
-    // Rol del usuario
-    this.alumno.rol = this.rol;
+    this.token = this.facadeService.getSessionToken();
+    if(this.activatedRoute.snapshot.params['id']!=undefined)
+      {
+        this.editar = true;
+        this.idUser = this.activatedRoute.snapshot.params['id'];
+        console.log("ID USUARIO: ", this.idUser);
+        //al ingresar a editar, cargar los datos del usuario
+        this.alumno = this.datos_user;
+      }else{
+        //primer registro de admin
+        this.alumno = this.alumnosService.esquemaAlumno();
+        this.alumno.rol = this.rol;
+        this.token = this.facadeService.getSessionToken();
 
-    console.log("Datos alumno: ", this.alumno);
+      }
+      console.log("alumno: ", this.alumno);
   }
 
   public regresar(){
@@ -79,8 +92,28 @@ export class RegistroAlumnosComponent implements OnInit {
   }
 
   public actualizar(){
-    // Lógica para actualizar los datos de un alumno existente
+  // Validamos el formulario
+  this.errors = {};
+  this.errors = this.alumnosService.validarAlumno(this.alumno, this.editar);
+  if(Object.keys(this.errors).length > 0){
+    return false;
   }
+
+  // Ejecutar servicio de editar
+  this.alumnosService.actualizarAlumno(this.alumno).subscribe(
+    (response) => {
+      // Redirigir o mostrar mensaje de éxito
+      alert("Alumno actualizado exitosamente");
+      console.log("Alumno actualizado: ", response);
+      this.router.navigate(["alumnos"]);
+    },
+    (error) => {
+      // Manejar errores de la API
+      alert("Error al actualizar alumno");
+      console.error("Error al actualizar alumno: ", error);
+    }
+  );
+}
 
   //Funciones para password
   showPassword()

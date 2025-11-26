@@ -77,7 +77,7 @@ export class RegistroUsuariosScreenComponent implements OnInit {
         }
 
       );
-    }else if(this.rol == "maestro"){
+    }else if(this.rol == "maestros"){
       this.maestrosService.obtenerMaestroPorID(this.idUser).subscribe(
         (response:any) => {
           console.log("Datos del maestro: ", this.user);
@@ -86,13 +86,21 @@ export class RegistroUsuariosScreenComponent implements OnInit {
           this.user.last_name = response.user?.last_name || response.last_name;
           this.user.email = response.user?.email || response.email;
           this.user.tipo_usuario = this.rol;
+          // Parsear materias_json 
+          if(typeof this.user.materias_json === 'string') {
+            try {
+              this.user.materias_json = JSON.parse(this.user.materias_json);
+            } catch(e) {
+              this.user.materias_json = [];
+            }
+          }
           this.isMaestro = true;
         }, (error) => {
           console.log("Error : ", error);
           alert("No se pudieron obtener los datos del maestro");
         }
       );
-    }else if(this.rol == "alumno"){
+    }else if(this.rol == "alumnos"){
       this.alumnosService.obtenerAlumnoPorID(this.idUser).subscribe(
         (response:any) => {
           console.log("Datos del alumno: ", this.user);

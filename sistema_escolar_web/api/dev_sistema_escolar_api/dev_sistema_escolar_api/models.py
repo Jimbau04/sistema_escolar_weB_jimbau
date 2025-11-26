@@ -1,3 +1,5 @@
+# dev_sistema_escolar_api/models.py
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -25,10 +27,8 @@ class Administradores(models.Model):
     creation = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     update = models.DateTimeField(null=True, blank=True)
 
-    
-
     def __str__(self):
-        return "Perfil del admin "+self.first_name+" "+self.last_name
+        return f"Perfil del admin {self.user.first_name} {self.user.last_name}"
     
 class Alumnos(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -44,7 +44,7 @@ class Alumnos(models.Model):
     update = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return "Perfil del alumno "+self.first_name+" "+self.last_name
+        return f"Perfil del alumno {self.user.first_name} {self.user.last_name}"
     
 class Maestros(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -54,7 +54,6 @@ class Maestros(models.Model):
     telefono = models.CharField(max_length=255, null=True, blank=True)
     rfc = models.CharField(max_length=255,null=True, blank=True)
     cubiculo = models.CharField(max_length=255,null=True, blank=True)
-    # edad = models.IntegerField(null=True, blank=True)
     area_investigacion = models.CharField(max_length=255,null=True, blank=True)
     materias_json = models.TextField(null=True, blank=True)
     creation = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -64,4 +63,4 @@ class Maestros(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return "Perfil del maestro "+self.first_name+" "+self.last_name
+        return f"Perfil del maestro {self.user.first_name} {self.user.last_name}"
