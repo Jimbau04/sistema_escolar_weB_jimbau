@@ -161,3 +161,13 @@ class AlumnosView(generics.CreateAPIView):
         
         user.save()
         return Response({"message": "Alumno actualizado correctamente", "alumno": AlumnoSerializer(alumno).data}, 200)
+    
+    @transaction.atomic
+    def delete(self, request, *args, **kwargs):
+        #permissions_classes = (permissions.IsAuthenticated,)
+        alumno = get_object_or_404(Alumnos, id=request.GET.get("id"))
+        try:
+            alumno.user.delete()
+            return Response({"message": "Alumno eliminado correctamente"}, 200)
+        except Exception as e:
+            return Response({"message": "Error al eliminar el alumno: "+str(e)}, 400)

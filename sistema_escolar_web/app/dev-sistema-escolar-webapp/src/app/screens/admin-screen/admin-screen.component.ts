@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdministradoresService } from 'src/app/services/administradores.service';
 import { FacadeService } from 'src/app/services/facade.service';
+import { MatDialog } from '@angular/material/dialog';
+import { EliminarUserModalComponent } from 'src/app/modals/eliminar-user-modal/eliminar-user-modal.component';
 
 @Component({
   selector: 'app-admin-screen',
@@ -17,6 +19,7 @@ export class AdminScreenComponent implements OnInit {
     public facadeService: FacadeService,
     private administradoresService: AdministradoresService,
     private router: Router,
+    public dialog: MatDialog,
   ) { }
 
   ngOnInit(): void {
@@ -44,7 +47,27 @@ export class AdminScreenComponent implements OnInit {
   }
 
   public delete(idUser: number){
+    const userIdSession = Number(this.facadeService.getUserId());
+    
+      //Si es administrador o es maestro, es decir, cumple la condición, se puede eliminar
+      const dialogRef = this.dialog.open(EliminarUserModalComponent,{
+        data: {id: idUser, rol: 'administrador'}, //Se pasan valores a través del componente
+        height: '288px',
+        width: '328px',
+      });
 
+    dialogRef.afterClosed().subscribe(result => {
+      if(result.isDelete){
+        console.log("admin eliminado");
+        alert("Administrador eliminado correctamente.");
+        //Recargar página
+        window.location.reload();
+      }else{
+        alert("Administrador no se ha podido eliminar.");
+        console.log("No se eliminó el administrador");
+      }
+    });
+    
   }
 
 }

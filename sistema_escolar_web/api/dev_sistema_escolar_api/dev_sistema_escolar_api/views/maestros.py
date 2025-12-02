@@ -169,4 +169,29 @@ class MaestrosView(generics.CreateAPIView):
         
         return Response({"message": "Maestro actualizado correctamente", "maestro": MaestroSerializer(maestro).data}, 200)
     
+    # Eliminar maestro con delete (Borrar realmente)
+    @transaction.atomic
+    def delete(self, request, *args, **kwargs):
+        maestro = get_object_or_404(Maestros, id=request.GET.get("id"))
+        try:
+            maestro.user.delete()
+            return Response({"details":"Maestro eliminado"},200)
+        except Exception as e:
+            return Response({"details":"Algo pasó al eliminar"},400)
+    
+    #Eliminar maestro (Desactivar usuario)
+    # @transaction.atomic
+    # def delete(self, request, *args, **kwargs):
+    #     id_maestro = kwargs.get('id_maestro', None)
+    #     if id_maestro:
+    #         try:
+    #             maestro = Maestros.objects.get(id=id_maestro)
+    #             user = maestro.user
+    #             user.is_active = 0
+    #             user.save()
+    #             return Response({"message":"Maestro con ID "+str(id_maestro)+" eliminado correctamente."},200)
+    #         except Maestros.DoesNotExist:
+    #             return Response({"message":"Maestro con ID "+str(id_maestro)+" no encontrado."},404)
+    #     return Response({"message":"Se necesita el ID del maestro."},400)
+    
    

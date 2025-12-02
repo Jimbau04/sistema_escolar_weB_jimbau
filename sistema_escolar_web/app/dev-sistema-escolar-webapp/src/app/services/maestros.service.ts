@@ -182,4 +182,17 @@ export class MaestrosService {
     }
     return this.http.put<any>(`${environment.url_api}/maestros/`, data, { headers });
   }
+
+  //Servicio para eliminar un maestro
+  public eliminarMaestro(idMaestro: number): Observable<any>{
+    // Verificamos si existe el token de sesión
+    const token = this.facadeService.getSessionToken();
+    let headers: HttpHeaders;
+    if (token) {
+      headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token });
+    } else {
+      headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    }
+    return this.http.delete<any>(`${environment.url_api}/maestros/?id=${idMaestro}`, { headers });
+  }
 }

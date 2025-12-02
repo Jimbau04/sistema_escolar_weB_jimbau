@@ -6,6 +6,8 @@ import { FacadeService } from 'src/app/services/facade.service';
 import { MaestrosService } from 'src/app/services/maestros.service';
 import { MatSort, Sort, MatSortModule} from '@angular/material/sort';
 import { debounceTime, distinctUntilChanged, Subject, Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { EliminarUserModalComponent } from 'src/app/modals/eliminar-user-modal/eliminar-user-modal.component';
 
 
 @Component({
@@ -37,6 +39,7 @@ export class MaestrosScreenComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
@@ -47,6 +50,7 @@ export class MaestrosScreenComponent implements OnInit {
     public facadeService: FacadeService,
     public maestrosService: MaestrosService,
     private router: Router,
+    public dialog: MatDialog,
   ) { }
 
   ngOnInit(): void {
@@ -66,7 +70,7 @@ export class MaestrosScreenComponent implements OnInit {
       debounceTime(400), // Espera 400ms después de que el usuario deje de escribir
       distinctUntilChanged() // Solo busca si el valor cambió
     ).subscribe(searchValue => {
-      console.log('🔍 Buscando:', searchValue);
+      console.log('Buscando:', searchValue);
       this.searchValue = searchValue;
       this.pageIndex = 0; // Resetear a la primera página
       this.obtenerMaestros();
@@ -118,7 +122,28 @@ export class MaestrosScreenComponent implements OnInit {
   }
 
   public delete(idUser: number) {
+    const userIdSession = Number(this.facadeService.getUserId());
+    if(this.rol === 'administrador' || this.rol === 'maestros' && userIdSession === idUser){
+      const dialogRef = this.dialog.open(EliminarUserModalComponent, {
+        data: { id: idUser, rol: 'maestro' },
+        width: '328px',
+        height: '288px',
+    });
+      dialogRef.afterClosed().subscribe(result => {
+        if(result.isDelete){
+          console.log("maestro eliminado: ", idUser);
+          alert("Usuario eliminado correctamente");
+          window.location.reload();
+        }else{
+          alert("No se ha eliminado al usuario");
+          console.log("No se ha eliminado al usuario");
+        }
+      });
 
+    }else{
+      alert("No tienes permisos para eliminar este usuario");
+      return;
+    }
   }
 
   onPageChange(event: PageEvent) {

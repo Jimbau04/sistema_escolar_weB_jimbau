@@ -99,3 +99,13 @@ class AdminView(generics.CreateAPIView):
         user.last_name = request.data["last_name"]
         user.save()
         return Response({"message": "Admin actualizado correctamente", "admin": AdminSerializer(admin).data}, 200)
+    
+    @transaction.atomic
+    def delete(self, request, *args, **kwargs):
+        #permissions_classes = (permissions.IsAuthenticated,)
+        admin = get_object_or_404(Administradores, id=request.GET.get("id"))
+        try:
+            admin.user.delete()
+            return Response({"details":"Admin eliminado"},200)
+        except Exception as e:
+            return Response({"details":"Algo pasó al eliminar"},400)

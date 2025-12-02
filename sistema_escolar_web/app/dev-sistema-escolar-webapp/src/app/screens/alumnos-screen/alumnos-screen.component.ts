@@ -6,6 +6,8 @@ import { FacadeService } from 'src/app/services/facade.service';
 import { AlumnosService } from 'src/app/services/alumnos.service';
 import { MatSort, Sort, MatSortModule} from '@angular/material/sort';
 import { debounceTime, distinctUntilChanged, Subject, Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { EliminarUserModalComponent } from 'src/app/modals/eliminar-user-modal/eliminar-user-modal.component';
 
 
 @Component({
@@ -46,6 +48,7 @@ export class AlumnosScreenComponent implements OnInit {
       public facadeService: FacadeService,
       public alumnosService: AlumnosService,
       private router: Router,
+      public dialog: MatDialog,
     ) { }
 
 
@@ -116,7 +119,28 @@ export class AlumnosScreenComponent implements OnInit {
   }
 
   public delete(idUser: number) {
+    const userIdSession = Number(this.facadeService.getUserId());
+    if(this.rol === 'administrador' || this.rol === 'alumnos' && userIdSession === idUser){
+      const dialogRef = this.dialog.open(EliminarUserModalComponent, {
+        data: { id: idUser, rol: 'alumno' },
+        width: '328px',
+        height: '288px',
+    });
+      dialogRef.afterClosed().subscribe(result => {
+        if(result.isDelete){
+          console.log("alumno eliminado: ", idUser);
+          alert("alumno eliminado correctamente");
+          window.location.reload();
+        }else{
+          alert("No se ha eliminado al alumno");
+          console.log("No se ha eliminado al alumno");
+        }
+      });
 
+    }else{
+      alert("No tienes permisos para eliminar este usuario");
+      return;
+    }
   }
 
   onPageChange(event: PageEvent) {
