@@ -109,3 +109,30 @@ class AdminView(generics.CreateAPIView):
             return Response({"details":"Admin eliminado"},200)
         except Exception as e:
             return Response({"details":"Algo pasó al eliminar"},400)
+
+class TotalUsers(generics.CreateAPIView):
+    #Contar el total de cada tipo de usuarios
+    def get(self, request, *args, **kwargs):
+        #Obtener total de admins
+        admin = Administradores.objects.filter(user__is_active = 1).order_by("id")
+        lista_admins = AdminSerializer(admin, many=True).data
+        # Obtienes la cantidad de elementos en la lista
+        total_admins = len(lista_admins)
+
+        #Obtener total de maestros
+        maestros = Maestros.objects.filter(user__is_active = 1).order_by("id")
+        lista_maestros = MaestroSerializer(maestros, many=True).data
+        #Aquí convertimos los valores de nuevo a un array
+        if not lista_maestros:
+            return Response({},400)
+        for maestro in lista_maestros:
+            maestro["materias_json"] = json.loads(maestro["materias_json"])
+        
+        total_maestros = len(lista_maestros)
+
+        #Obtener total de alumnos
+        alumnos = Alumnos.objects.filter(user__is_active = 1).order_by("id")
+        lista_alumnos = AlumnoSerializer(alumnos, many=True).data
+        total_alumnos = len(lista_alumnos)
+
+        return Response({'admins': total_admins, 'maestros': total_maestros, 'alumnos:':total_alumnos }, 200)
